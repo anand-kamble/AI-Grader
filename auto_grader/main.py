@@ -1,3 +1,4 @@
+# %%
 import os
 from typing import List
 
@@ -8,6 +9,7 @@ from langsmith import traceable
 load_dotenv()
 
 
+# %%
 # @traceable
 def format_prompt(subject: str) -> List[dict[str, str]]:
     return [
@@ -22,6 +24,7 @@ def format_prompt(subject: str) -> List[dict[str, str]]:
     ]
 
 
+# %%
 llm = HuggingFacePipeline.from_model_id(
     model_id="microsoft/Phi-3-mini-4k-instruct",
     task="text-generation",
@@ -31,17 +34,20 @@ llm = HuggingFacePipeline.from_model_id(
 )
 
 
+# %%
 # @traceable(run_type="llm")
 def invoke_llm(messages: List[dict[str, str]]):
 
     return llm.invoke(messages)
 
 
+# %%
 # @traceable
 def parse_output(response):
     return response
 
 
+# %%
 # @traceable
 def run_pipeline():
     messages = format_prompt("colorful socks")
@@ -49,11 +55,13 @@ def run_pipeline():
     # return parse_output(response)
 
 
+# %%
 def main():
     print("Running pipeline...")
     res = run_pipeline()
     print(res)
 
 
+# %%
 if __name__ == "__main__":
     main()
