@@ -45,7 +45,7 @@ def main():
     # Note: This process might take some time; be patient if it seems to be stuck at certain percentages
     testset = generator.generate_with_llamaindex_docs(
         documents,
-        test_size=1,
+        test_size=10,
         # distributions={simple: 0.5, reasoning: 0.25, multi_context: 0.25},
         # Uncommenting the above line might cause the loop to get stuck at 78%
     )
@@ -95,6 +95,7 @@ def main():
         dataset=testset_dict,
         llm=evaluator_llm,
         embeddings=OllamaEmbedding(model_name="phi3:latest"),
+	raise_exceptions=False
     )
 
     print("========= RESULTS =========")
