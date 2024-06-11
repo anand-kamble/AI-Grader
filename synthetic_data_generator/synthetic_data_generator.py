@@ -1,7 +1,18 @@
-from llama_index.core import SimpleDirectoryReader
-from llama_index.llms.ollama import Ollama
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.core.settings import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama
+from ragas.integrations.llama_index import evaluate
+from ragas.metrics import (
+    answer_relevancy,
+    context_precision,
+    context_recall,
+    faithfulness,
+)
+from ragas.metrics.critique import harmfulness
 from ragas.testset.generator import TestsetGenerator
+
 
 def main():
     """
@@ -40,9 +51,57 @@ def main():
     )
 
     print("Writing testset to CSV...")
+
+    testset_df = testset.to_pandas()
+
     # Save the generated test set as a CSV file
-    testset.to_pandas().to_csv("testset.csv", index=False)
+    testset_df.to_csv("testset.csv", index=False)
     print("Testset generation completed successfully.")
+
+    ### ============= BUILDING THE QUERY ENGINE ================== ###
+
+    # Updating the embed model, this is required for the VectorStoreIndex
+    # https://docs.llamaindex.ai/en/stable/module_guides/models/embeddings/#modules
+    Settings.embed_model = embeddings
+
+    print("Building the vector index...")
+    vector_index = VectorStoreIndex.from_documents(documents)
+
+    print("Building the query engine...")
+    query_engine = vector_index.as_query_engine(llm=generator_llm)
+
+    print("Querying the engine...")
+    response_vector = query_engine.query(testset_df["question"][0])
+    print(f"{response_vector=}")
+
+    ### ============= EVALUATING THE QUERY ENGINE ============= ###
+
+    metrics = [
+        faithfulness,
+        answer_relevancy,
+        context_precision,
+        context_recall,
+        harmfulness,
+    ]
+
+    # using GPT 3.5, use GPT 4 / 4-turbo for better accuracy
+    evaluator_llm = critic_llm  # OpenAI(model="gpt-3.5-turbo")
+    # USING CRITIC LLM TO KEEP EVERYTHING LOCAL FOR NOW.
+    testset_dict = (testset.to_dataset()).to_dict()
+    print("Evaluating the query engine...")
+    result = evaluate(
+        query_engine=query_engine,
+        metrics=metrics,
+        dataset=testset_dict,
+        llm=evaluator_llm,
+        embeddings=OllamaEmbedding(model_name="phi3:latest"),
+    )
+
+    print("========= RESULTS =========")
+    print(result)
+
+    result.to_pandas().to_csv("evaluation_results.csv", index=False)
+
 
 if __name__ == "__main__":
     main()
