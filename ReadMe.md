@@ -1,3 +1,4 @@
+
 # AI Grader
 
 This project aims to develop a completely automated grading system using a Large Language Model (LLM).
@@ -21,6 +22,11 @@ To set up and run the project, follow these steps:
    To generate the test set, you can pass the `--testset` argument to the script:
    ```bash
    ./run.sh --testset
+   ```
+
+   To use TruLens, you can pass the `--trulens` argument to the script:
+   ```bash
+   ./run.sh --trulens
    ```
 
 ## Details
