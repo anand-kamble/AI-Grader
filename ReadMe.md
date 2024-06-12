@@ -61,6 +61,48 @@ This project now includes functionality for generating a test set using LlamaInd
 6. **Writing Testset to CSV:**
    - The generated test set is saved as a CSV file named `testset.csv`.
 
+### TruLens Integration
+
+#### Adding Feedback Functions
+
+1. **Initialize the Embedding Model:**
+   - Uses `HuggingFaceEmbedding` with the model `BAAI/bge-small-en-v1.5`.
+
+2. **Load Documents and Create Vector Store Index:**
+   - Documents are loaded from the `./data` directory.
+   - A vector store index is created from the documents.
+
+3. **Initialize the LLM and Create a Query Engine:**
+   - Uses the `Ollama` model (`phi3:latest`).
+
+4. **Configure LiteLLM Provider for Feedback Functions:**
+   - Sets up `LiteLLM` with the necessary configurations.
+
+5. **Select Context for the Application:**
+   - The context for the application is selected using `App.select_context`.
+
+6. **Define Feedback Functions:**
+   - Groundedness feedback function.
+   - Relevance feedback functions for both answer and context.
+
+7. **Initialize TruLlama Query Engine Recorder:**
+   - Sets up `TruLlama` with the query engine and feedback functions.
+
+8. **Query the Engine and Record the Process:**
+   - Queries the engine with test questions and records the process.
+   - Retrieves and prints feedback results.
+
+#### Viewing Results and Running Dashboard
+
+1. **Retrieve Feedback Results:**
+   - Retrieves and prints feedback results from the recorded process.
+
+2. **Access Records and Feedback:**
+   - Access records and feedback using `Tru`.
+
+3. **Run the Tru Dashboard:**
+   - Uncomment the necessary line to run the Tru dashboard for visualizing the results.
+
 ## Future Work
 1. Improve the method for providing context to the LLM.
 2. Format the output from the model for better readability and usability.
@@ -82,3 +124,4 @@ export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
 This solution was found by following the instructions mentioned in [this GitHub issue](https://github.com/python-poetry/poetry/issues/7235).
 
 ---
+
