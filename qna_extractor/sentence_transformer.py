@@ -13,3 +13,6 @@ document_embeddings = model.encode(docs)
 # %%
 query = "What is Python?"
 query_embedding = model.encode(query)
+
+# %%
+model.
