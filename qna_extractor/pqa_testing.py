@@ -1,12 +1,8 @@
 import os
 import pickle
 
-from paperqa import Docs, QueryRequest, Settings, ask
-from paperqa.agents.models import AnswerResponse
-from paperqa.settings import AgentSettings
+from paperqa import Answer, Docs, Settings, ask
 from tqdm import tqdm
-
-os.environ["OPENAI_API_KEY"] = "i-am-not-used-but-must-be-here"
 
 local_llm_config = {
     "model_list": [
@@ -20,6 +16,18 @@ local_llm_config = {
     ]
 }
 
+# Default settings for the LLM and embedding
+# Using this object we are specifying the models to be used,
+# Currently it will use Ollama with llama3.1 model for both LLM and summary LLM
+# and embeddings as well.
+DEFAULT_SETTINGS = Settings(
+    llm="ollama/llama3.1",
+    llm_config=local_llm_config,
+    summary_llm="ollama/llama3.1",
+    summary_llm_config=local_llm_config,
+    temperature=0.2,
+    embedding="ollama/llama3.1",
+)
 
 # Specify the pickle file and the directory containing your PDF files
 pickle_file = "pqa_docs_cache.pkl"
@@ -45,17 +53,7 @@ else:
             filepath = os.path.join(docs_dir, filename)
             try:
                 # Add each PDF file to the Docs object
-                docs.add(
-                    filepath,
-                    settings=Settings(
-                        llm="ollama/llama3.1",
-                        llm_config=local_llm_config,
-                        summary_llm="ollama/llama3.1",
-                        summary_llm_config=local_llm_config,
-                        temperature=0.2,
-                        embedding="ollama/llama3.1",
-                    ),
-                )
+                docs.add(filepath, settings=DEFAULT_SETTINGS)
                 print(f"Added {filename} to Docs.")
             except Exception as e:
                 print(f"Failed to add {filename}: {e}")
@@ -65,29 +63,7 @@ else:
         pickle.dump(docs, f)
     print("Saved Docs object to pickle.")
 
-
-# answer: AnswerResponse = ask(
-#     query="What is K means?",
-#     settings=Settings(
-#         llm="ollama/llama3.1",
-#         llm_config=local_llm_config,
-#         summary_llm="ollama/llama3.1",
-#         summary_llm_config=local_llm_config,
-#         paper_directory="solutions_questions",
-#         temperature=0.2,
-#     ),
-# )
-
-answer = docs.query(
-    query="What is K means?",
-    settings=Settings(
-        llm="ollama/llama3.1",
-        llm_config=local_llm_config,
-        summary_llm="ollama/llama3.1",
-        summary_llm_config=local_llm_config,
-        temperature=0.2,
-        embedding="ollama/llama3.1",
-    ),
-)
+# Ask a question to the Docs object
+answer: Answer = docs.query(query="What is K means?", settings=DEFAULT_SETTINGS)
 
 print(answer)
